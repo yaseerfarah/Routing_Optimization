@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="yaseerfarah22.com.follow_me3.MainActivity">
+
+
+
+    <com.esri.android.map.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        mapoptions.MapType="Streets"
+        mapoptions.center="30.044281, 31.340002"
+        mapoptions.ZoomLevel="12"
+        />
+
+    <ImageButton
+        android:id="@+id/rout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/location"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="18dp"
+        android:background="@mipmap/button_form"
+        android:src="@mipmap/rout1"
+        tools:ignore="MissingConstraints" />
+
+    <ImageButton
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="20dp"
+        android:background="@mipmap/button_form"
+        android:src="@mipmap/location"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="334dp"
+        tools:layout_editor_absoluteY="387dp" />
+
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/searchText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:hint="@string/search_hint"
+            android:inputType="text"
+            android:minWidth="150dp"
+            tools:ignore="MissingConstraints"
+            tools:layout_editor_absoluteX="91dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+        <ImageButton
+            android:id="@+id/searchButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/searchText"
+
+            android:layout_alignRight="@id/searchText"
+            android:background="@android:color/white"
+
+            android:contentDescription="@string/menu_search"
+            android:src="@android:drawable/ic_menu_search" />
+
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>
