@@ -30,7 +30,7 @@ public class slider_adapter extends PagerAdapter{
     public int[] slider_image={
             R.mipmap.search,
             R.mipmap.location2,
-            R.mipmap.road
+            R.mipmap.road2
 
 
     };

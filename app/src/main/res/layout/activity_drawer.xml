@@ -59,4 +59,7 @@
         android:choiceMode="singleChoice"
         android:background="#80000000"
          />
+
+
+
 </android.support.v4.widget.DrawerLayout>

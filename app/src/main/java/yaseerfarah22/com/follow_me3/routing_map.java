@@ -1,21 +1,34 @@
 package yaseerfarah22.com.follow_me3;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -71,7 +84,9 @@ public class routing_map extends AppCompatActivity {
     SpatialReference ref;
     GraphicsLayer mGraphicsLayer;
     GraphicsLayer mGraphicsLayer_road;
-    DrawerLayout mDrawerLayout;
+    NestedScrollView mDrawerLayout;
+    BottomSheetBehavior bottomSheetBehavior;
+    ImageButton bottom_location;
     ListView mDrawerList;
     final String ClientID = "HNso5DbSmS3392fS";
     final String Token = "Q__EszKDMJ8duzbIK2XN-W8VOLSeIdAZAHzz0qxdkZkO2uQ0jxL61ZIt9G0BaHGlg6Y7KW8TS6r7uT9jKnG3xkmSlNe4-gDwhLspe759KMbVgoe6ogqcxrpP0vOol2BU";
@@ -88,11 +103,20 @@ public class routing_map extends AppCompatActivity {
     TextView distance;
 
 
+    LocationDisplayManager location;
+    LocationManager manager;
+    String[] reqPermissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission
+            .ACCESS_COARSE_LOCATION};
+    private int requestCode = 2;
+
+    boolean isLocation=false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_drawer);
+        setContentView(R.layout.activity_result);
         ArcGISRuntime.setClientId("HNso5DbSmS3392fS");
 
         if (isOnline()) {
@@ -119,21 +143,60 @@ public class routing_map extends AppCompatActivity {
                 is_fast=false;
             }
 
-            arrive=(TextView)findViewById(R.id.arraivel);
-            distance=(TextView)findViewById(R.id.distance);
-            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            arrive=(TextView)findViewById(R.id.time_number);
+            distance=(TextView)findViewById(R.id.km_number);
+            bottom_location=(ImageButton) findViewById(R.id.bottom_ex);
+            mDrawerLayout = (NestedScrollView) findViewById(R.id.bottom_sheet);
             mDrawerList = (ListView) findViewById(R.id.left_drawer);
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setTitle("Finding Route");
             mProgressDialog.setMessage("Please wait…");
-            // mProgressDialog.show();
+            mProgressDialog.setCanceledOnTouchOutside(false);
+            mProgressDialog.setCancelable(false);
+
+            bottomSheetBehavior=BottomSheetBehavior.from(mDrawerLayout);
+
+
+
+
+            bottom_location.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+                    if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        buildAlertMessageNoGps();
+                    } else {
+                        boolean permissionCheck1 = ContextCompat.checkSelfPermission(routing_map.this, reqPermissions[0]) ==
+                                PackageManager.PERMISSION_GRANTED;
+                        boolean permissionCheck2 = ContextCompat.checkSelfPermission(routing_map.this, reqPermissions[1]) ==
+                                PackageManager.PERMISSION_GRANTED;
+
+                        if (permissionCheck1 && permissionCheck2) {
+                            display_loc();
+
+
+                        } else {
+
+                            // If permissions are not already granted, request permission from the user.
+                            ActivityCompat.requestPermissions(routing_map.this, reqPermissions, requestCode);
+                        }
+
+
+                    }
+
+                }
+            });
+
 
             UserCredentials userCredentials = new UserCredentials();
             userCredentials.setUserAccount("yaseer_farah", "y010195101700");
             userCredentials.setUserToken(Token, ClientID);
             mPortal = new Portal(URL, userCredentials);
             // Create a new instance of WebMap
+            mProgressDialog.show();
             WebMap.newInstance(id, mPortal, new CallbackListener<WebMap>() {
+
 
                 @Override
                 public void onError(Throwable e) {
@@ -169,6 +232,10 @@ public class routing_map extends AppCompatActivity {
                                                 mGraphicsLayer_road = new GraphicsLayer();
                                                 map_view.addLayer(mGraphicsLayer);
                                                 map_view.addLayer(mGraphicsLayer_road);
+                                                map_view.enableWrapAround(true);
+                                                map_view.setAllowRotationByPinch(true);
+                                                map_view.setAllowOneFingerZoom(true);
+                                                location = map_view.getLocationDisplayManager();
                                                 new find_route().execute();
 
                                                 break;
@@ -250,6 +317,12 @@ public class routing_map extends AppCompatActivity {
 
 Exception ex=null;
 
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
 
         @Override
         protected Route doInBackground(Void... params) {
@@ -381,9 +454,11 @@ else {
             if(ex!=null) {
                 Log.w("PlaceSearch",ex.toString());
                 Toast.makeText(routing_map.this, ex.toString(), Toast.LENGTH_LONG).show();
+                finish();
             }
             else {
 
+                mProgressDialog.dismiss();
                 if (route != null) {
 
 
@@ -406,7 +481,7 @@ else {
                         directionsArray[i++] = dm.getText();
                     }
                     mDrawerList.setAdapter(new ArrayAdapter<>(getApplicationContext(),
-                            R.layout.drawer_layout_text, directionsArray));
+                            R.layout.drawer_layout_text2, directionsArray));
 
 
 
@@ -448,7 +523,7 @@ else {
                             if (mGraphicsLayer_road.getNumberOfGraphics() > 0) {
                                 mGraphicsLayer_road.removeAll();
                             }
-                            mDrawerLayout.closeDrawers();
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                             RouteDirection dm = directions.get(position);
                             Geometry gm = dm.getGeometry();
                             Polyline poly = (Polyline) engine.project(gm, SpatialReference.create(4326), ref);
@@ -464,14 +539,51 @@ else {
 
                 }
 
+
+                SimpleDateFormat hr_mn = new SimpleDateFormat("hh:mm");
+                String time=String.format("%.0f",route.getTotalMinutes());
+                String dis=String.format("%.2f",route.getTotalKilometers());
+                dis = dis.replace("٠", "0").replace("١", "1").replace("٢", "2").replace("٣", "3").replace("٤", "4").replace("٥", "5").replace("٦", "6").replace("٧", "7").replace("٨", "8").replace("٩", "9");
+
+                arrive.setText(formatHoursAndMinutes(Integer.valueOf(time)));
+                distance.setText(dis);
+
+
+
+                mDrawerLayout.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                        mDrawerList.requestDisallowInterceptTouchEvent(true);
+                        return false;
+                    }
+                });
+
+
+                mDrawerList.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                        mDrawerLayout.requestDisallowInterceptTouchEvent(true);
+                        return false;
+                    }
+                });
+
             }
 
-            String time=String.format("%.2f",route.getTotalMinutes());
-            String dis=String.format("%.2f",route.getTotalKilometers());
-            arrive.setText("Arrival time ="+time+"Minutes");
 
 
         }
+
+
+
+        private String formatHoursAndMinutes(int totalMinutes) {
+            String minutes = Integer.toString(totalMinutes % 60);
+            minutes = minutes.length() == 1 ? "0" + minutes : minutes;
+            return (totalMinutes / 60) + ":" + minutes;
+        }
+
+
 
         private void sympol(Geometry point,Drawable bitmap){
             PictureMarkerSymbol marker=new PictureMarkerSymbol(bitmap);
@@ -484,30 +596,12 @@ else {
         private int day(Calendar cal){
             int x=cal.get(Calendar.DAY_OF_WEEK);
             int day_number=0;
-            switch (x){
-                case 1:
-                    day_number=7;
-                    break;
-                case 2:
-                    day_number=1;
-                    break;
-                case 3:
-                    day_number=2;
-                    break;
-                case 4:
-                    day_number=3;
-                    break;
-                case 5:
-                    day_number=4;
-                    break;
-                case 6:
-                    day_number=5;
-                    break;
-                case 7:
-                    day_number=6;
-                    break;
 
-            }
+           if(x-1==0){
+               day_number=7;
+           }else {
+               day_number=x-1;
+           }
 
             return day_number;
 
@@ -519,6 +613,56 @@ else {
     }
 
 
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    private  void  display_loc(){
+        location.setAutoPanMode(LocationDisplayManager.AutoPanMode.NAVIGATION);
+        if (!location.isStarted()){
+            location.start();
+        }
+        isLocation=true;
+    }
+
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // Location permission was granted. This would have been triggered in response to failing to start the
+            // LocationDisplay, so try starting this again.
+            display_loc();
+
+
+        }
+    }
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    private void buildAlertMessageNoGps() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+
+
     public boolean isOnline() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -526,5 +670,13 @@ else {
         return netInfo != null && netInfo.isConnected();
     }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(flag){
+            location.stop();}
+    }
 
 }

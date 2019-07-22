@@ -19,62 +19,79 @@
 
     <ImageButton
         android:id="@+id/rout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_above="@+id/location"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="18dp"
         android:background="@mipmap/button_form"
-        android:src="@mipmap/rout1"
+        android:elevation="8dp"
+        android:src="@drawable/ic_directions_black_24dp"
         tools:ignore="MissingConstraints" />
 
     <ImageButton
         android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="20dp"
         android:background="@mipmap/button_form"
-        android:src="@mipmap/location"
+        android:src="@drawable/ic_my_location_black_24dp"
+        android:elevation="8dp"
         tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="334dp"
-        tools:layout_editor_absoluteY="387dp" />
+        />
 
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout"
+
+
+
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="40dp">
+        android:layout_height="50dp"
+        android:id="@+id/search"
+        android:layout_marginTop="20dp"
+        app:cardCornerRadius="20dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:elevation="8dp"
+        android:layout_alignParentTop="true"
 
-        <AutoCompleteTextView
-            android:id="@+id/searchText"
+        >
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/white"
-            android:gravity="center"
-            android:hint="@string/search_hint"
-            android:inputType="text"
-            android:minWidth="150dp"
-            tools:ignore="MissingConstraints"
-            tools:layout_editor_absoluteX="91dp"
-            tools:layout_editor_absoluteY="0dp" />
+            android:layout_height="match_parent">
 
-        <ImageButton
-            android:id="@+id/searchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignBottom="@+id/searchText"
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_search5"
+                android:backgroundTint="@color/gray"
+                android:layout_marginLeft="10dp"
+                android:layout_centerVertical="true"
+                android:id="@+id/searchButton"                />
 
-            android:layout_alignRight="@id/searchText"
-            android:background="@android:color/white"
+            <AutoCompleteTextView
+                android:id="@+id/searchText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/searchButton"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textSize="18sp"
+                android:hint="@string/search_hint"
+                android:textColorHint="@color/gray"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:layout_centerVertical="true"
+                android:background="#00000000"
+                tools:ignore="MissingConstraints"
+               />
 
-            android:contentDescription="@string/menu_search"
-            android:src="@android:drawable/ic_menu_search" />
 
 
-    </RelativeLayout>
+        </RelativeLayout>
 
-
+    </android.support.v7.widget.CardView>
 
 </RelativeLayout>
